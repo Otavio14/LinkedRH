@@ -1,14 +1,16 @@
 package com.linked.model;
 
-public class RequestWrapper {
-	ContaCorrente contaCorrente;
+import java.util.List;
+
+public class ContasCorrente_Correntista {
+	List<ContaCorrente> contaCorrente;
 	Correntista correntista;
 
-	public ContaCorrente getContaCorrente() {
+	public List<ContaCorrente> getContaCorrente() {
 		return contaCorrente;
 	}
 
-	public void setContaCorrente(ContaCorrente contaCorrente) {
+	public void setContaCorrente(List<ContaCorrente> contaCorrente) {
 		this.contaCorrente = contaCorrente;
 	}
 
