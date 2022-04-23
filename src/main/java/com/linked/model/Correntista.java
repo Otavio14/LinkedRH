@@ -1,18 +1,16 @@
 package com.linked.model;
 
-import java.sql.Date;
-
 public class Correntista {
 	private int id;
 	private String nome;
 	private String cpf;
-	private Date nascimento;
+	private String nascimento;
 
 	public Correntista() {
 		super();
 	}
 
-	public Correntista(int id, String nome, String cpf, Date nascimento) {
+	public Correntista(int id, String nome, String cpf, String nascimento) {
 		super();
 		this.id = id;
 		this.nome = nome;
@@ -44,11 +42,11 @@ public class Correntista {
 		this.cpf = cpf;
 	}
 
-	public Date getNascimento() {
+	public String getNascimento() {
 		return nascimento;
 	}
 
-	public void setNascimento(Date nascimento) {
+	public void setNascimento(String nascimento) {
 		this.nascimento = nascimento;
 	}
 }

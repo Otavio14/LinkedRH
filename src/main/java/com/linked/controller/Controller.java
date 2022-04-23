@@ -25,7 +25,7 @@ public class Controller {
 
 	@PostMapping("/contas")
 	public ResponseEntity<String> criarConta(@RequestBody ContaCorrente_Correntista contaCorrente_Correntista) {
-		if (contaCorrente_Correntista.getContaCorrente().getSaldo().compareTo(BigDecimal.ZERO) > 0)
+		if (contaCorrente_Correntista.getContaCorrente().getSaldo().compareTo(BigDecimal.ZERO) <= 0)
 			return new ResponseEntity<String>("O saldo deve ser maior do que zero!", HttpStatus.BAD_REQUEST);
 
 		return repository.criarConta(contaCorrente_Correntista);
