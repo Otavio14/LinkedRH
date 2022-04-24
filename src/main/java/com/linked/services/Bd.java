@@ -7,7 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class Bd {
-	private String connectionUrl = "jdbc:mysql://localhost:3306/linked";
+	private String connectionUrl = "jdbc:mysql://localhost:3306/linked?useAffectedRows=true";
 	private String connectionUsername = "root";
 	private String connectionPassword = "1234";
 	public Connection connection;

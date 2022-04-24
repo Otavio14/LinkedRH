@@ -9,13 +9,14 @@ public class ContaCorrente {
 	private BigDecimal limite;
 	private BigDecimal saldo;
 	private String ativa;
+	private String tipo;
 
 	public ContaCorrente() {
 		super();
 	}
 
-	public ContaCorrente(int id, int id_correntista, int id_agencia, BigDecimal limite, BigDecimal saldo,
-			String ativa) {
+	public ContaCorrente(int id, int id_correntista, int id_agencia, BigDecimal limite, BigDecimal saldo, String ativa,
+			String tipo) {
 		super();
 		this.id = id;
 		this.id_correntista = id_correntista;
@@ -23,6 +24,7 @@ public class ContaCorrente {
 		this.limite = limite;
 		this.saldo = saldo;
 		this.ativa = ativa;
+		this.tipo = tipo;
 	}
 
 	public int getId() {
@@ -71,6 +73,14 @@ public class ContaCorrente {
 
 	public void setAtiva(String ativa) {
 		this.ativa = ativa;
+	}
+
+	public String getTipo() {
+		return tipo;
+	}
+
+	public void setTipo(String tipo) {
+		this.tipo = tipo;
 	}
 
 }

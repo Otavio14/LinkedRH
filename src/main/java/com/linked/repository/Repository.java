@@ -45,12 +45,11 @@ public class Repository {
 				bd.resultSet = bd.preparedStatement.getGeneratedKeys();
 				if (bd.resultSet.next()) {
 					bd.preparedStatement = bd.connection.prepareStatement(
-							"INSERT INTO contacorrente(id_correntista,id_agencia,limite,saldo,ativa) VALUES(?,?,?,?,?)");
+							"INSERT INTO contacorrente(id_correntista,id_agencia,limite,saldo,ativa) VALUES(?,?,?,?,'T')");
 					bd.preparedStatement.setInt(1, bd.resultSet.getInt(1));
 					bd.preparedStatement.setInt(2, contaCorrente_Correntista.getContaCorrente().getId_agencia());
 					bd.preparedStatement.setBigDecimal(3, contaCorrente_Correntista.getContaCorrente().getLimite());
 					bd.preparedStatement.setBigDecimal(4, contaCorrente_Correntista.getContaCorrente().getSaldo());
-					bd.preparedStatement.setString(5, contaCorrente_Correntista.getContaCorrente().getAtiva());
 					bd.preparedStatement.execute();
 				}
 			} else {
@@ -165,7 +164,9 @@ public class Repository {
 			bd.preparedStatement.setInt(3, contaCorrente.get(1).getId());
 			bd.preparedStatement.setInt(4, contaCorrente.get(1).getId_agencia());
 			bd.resultSet = bd.preparedStatement.executeQuery();
+			int count = 0;
 			while (bd.resultSet.next()) {
+				count++;
 				if (bd.resultSet.getString("ativa").equals("F"))
 					return new ResponseEntity<String>("Conta inativa!", HttpStatus.BAD_REQUEST);
 				if (bd.resultSet.getInt("id") == contaCorrente.get(0).getId()
@@ -174,6 +175,8 @@ public class Repository {
 								.compareTo(bd.resultSet.getBigDecimal("limite").negate()) == -1)
 					return new ResponseEntity<String>("Limite excedido!", HttpStatus.FORBIDDEN);
 			}
+			if (count < 2)
+				return new ResponseEntity<String>("Conta inexistente!", HttpStatus.NOT_FOUND);
 			bd.preparedStatement = bd.connection
 					.prepareStatement("UPDATE contacorrente SET saldo=saldo-? WHERE id=? AND id_agencia=?");
 			bd.preparedStatement.setBigDecimal(1, contaCorrente.get(1).getSaldo());
@@ -219,17 +222,14 @@ public class Repository {
 				correntistaDados.setCpf(bd.resultSet.getString("cpf"));
 				correntistaDados.setNascimento(bd.resultSet.getString("nascimento"));
 				contasCorrente_Correntista.setCorrentista(correntistaDados);
-				bd.preparedStatement = bd.connection
-						.prepareStatement("SELECT * FROM contacorrente WHERE id_correntista=?");
+				bd.preparedStatement = bd.connection.prepareStatement(
+						"SELECT id,id_agencia,if(limite=0, 'Comum', 'Especial') as tipo FROM contacorrente WHERE id_correntista=?");
 				bd.preparedStatement.setInt(1, correntistaDados.getId());
 				bd.resultSet = bd.preparedStatement.executeQuery();
 				while (bd.resultSet.next()) {
 					contaCorrente.setId(bd.resultSet.getInt("id"));
-					contaCorrente.setId_correntista(bd.resultSet.getInt("id_correntista"));
 					contaCorrente.setId_agencia(bd.resultSet.getInt("id_agencia"));
-					contaCorrente.setLimite(bd.resultSet.getBigDecimal("limite"));
-					contaCorrente.setSaldo(bd.resultSet.getBigDecimal("saldo"));
-					contaCorrente.setAtiva(bd.resultSet.getString("ativa"));
+					contaCorrente.setTipo(bd.resultSet.getString("tipo"));
 					contasCorrente.add(contaCorrente);
 				}
 				contasCorrente_Correntista.setContaCorrente(contasCorrente);
@@ -248,11 +248,11 @@ public class Repository {
 
 		bd.connect();
 		try {
-			bd.preparedStatement = bd.connection
-					.prepareStatement("UPDATE contacorrente SET ativa='F' WHERE id=? AND id_agencia=?");
+			bd.preparedStatement = bd.connection.prepareStatement(
+					"UPDATE contacorrente SET ativa='F' WHERE id=? AND id_agencia=?", Statement.RETURN_GENERATED_KEYS);
 			bd.preparedStatement.setInt(1, contaCorrente.getId());
 			bd.preparedStatement.setInt(2, contaCorrente.getId_agencia());
-			bd.preparedStatement.executeUpdate();
+			int count = bd.preparedStatement.executeUpdate();
 			bd.preparedStatement = bd.connection
 					.prepareStatement("SELECT * FROM contacorrente WHERE id=? AND id_agencia=?");
 			bd.preparedStatement.setInt(1, contaCorrente.getId());
@@ -265,10 +265,12 @@ public class Repository {
 				contaCorrenteDados.setLimite(bd.resultSet.getBigDecimal("limite"));
 				contaCorrenteDados.setSaldo(bd.resultSet.getBigDecimal("saldo"));
 				contaCorrenteDados.setAtiva(bd.resultSet.getString("ativa"));
+				if (count == 0)
+					return new ResponseEntity<ContaCorrente>(contaCorrenteDados, HttpStatus.NOT_MODIFIED);
 				return new ResponseEntity<ContaCorrente>(contaCorrenteDados, HttpStatus.OK);
 			}
 			bd.close();
-			return new ResponseEntity<ContaCorrente>(contaCorrenteDados, HttpStatus.NOT_FOUND);
+			return new ResponseEntity<ContaCorrente>(contaCorrenteDados, HttpStatus.FORBIDDEN);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return new ResponseEntity<ContaCorrente>(contaCorrenteDados, HttpStatus.BAD_REQUEST);
